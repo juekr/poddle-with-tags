@@ -45,7 +45,7 @@ class EpisodeMetadata extends Serializable
             season: optional(Arr::get($content, 'itunes:season')?->getContent(), 'intval'),
             type: EpisodeType::tryFrom(Arr::get($content, 'itunes:episodeType')?->getContent() ?? ''),
             block: Arr::get($content, 'itunes:block')?->getContent() === 'yes',
-            keywords: Arr::get($content, 'itunes:keywords')?->getContent() ?? ''),
+            keywords: Arr::get($content, 'itunes:keywords')?->getContent() ?? '')
         );
     }
 
@@ -66,7 +66,7 @@ class EpisodeMetadata extends Serializable
                 Arr::get($data, 'block'),
                 static fn ($value) => filter_var($value, FILTER_VALIDATE_BOOLEAN)
             ),
-            keywords: optional(Arr::get($data, 'keywords'), 'string'),
+            keywords: optional(Arr::get($data, 'keywords'), 'string')
         );
     }
 
