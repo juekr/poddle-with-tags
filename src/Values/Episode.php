@@ -29,7 +29,7 @@ class Episode extends Serializable
 
     public static function fromXmlElement(Element $item): static
     {
-        try {
+       // try {
             /** @var array<string, Element> $content */
             $content = $item->getContent();
 
@@ -39,9 +39,9 @@ class Episode extends Serializable
                 enclosure: Enclosure::fromXmlElement(Arr::get($content, 'enclosure')),
                 metadata: EpisodeMetadata::fromXmlElement($item)
             );
-        } catch (Throwable $exception) {
-            throw new InvalidEpisodeElementException($exception);
-        }
+       // } catch (Throwable $exception) {
+       //     throw new InvalidEpisodeElementException($exception);
+       // }
     }
 
     /** @return array<string, mixed> */
