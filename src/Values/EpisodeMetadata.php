@@ -25,7 +25,7 @@ class EpisodeMetadata extends Serializable
         public readonly ?EpisodeType $type,
         public readonly ?bool $block,
         public readonly ?string $keywords,
-        public readonly ?string shownotes,
+        public readonly ?string $shownotes,
     ) {
     }
 
