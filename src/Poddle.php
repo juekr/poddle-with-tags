@@ -15,11 +15,8 @@ use PhanAn\Poddle\Values\EpisodeCollection;
 use PhanAn\Poddle\Values\FundingCollection;
 use PhanAn\Poddle\Values\TxtCollection;
 use Psr\Http\Client\ClientInterface;
-use Saloon\XmlWrangler\Exceptions\QueryAlreadyReadException;
-use Saloon\XmlWrangler\Exceptions\XmlReaderException;
 use Saloon\XmlWrangler\XmlReader;
 use Throwable;
-use VeeWee\Xml\Encoding\Exception\EncodingException;
 
 class Poddle
 {
@@ -44,24 +41,18 @@ class Poddle
         return new self($xml);
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     public function getChannel(): Channel
     {
         return new Channel(
-            url: $this->getSoleValue('atom:link@href'),
-            title: $this->getSoleValue('title'),
-            description: $this->getSoleValue('description'),
-            link: $this->getSoleValue('link'),
-            language: $this->getSoleValue('language'),
+            url: (string) $this->getSoleValue('atom:link@href'),
+            title: (string) $this->getSoleValue('title'),
+            description: (string) $this->getSoleValue('description'),
+            link: (string) $this->getSoleValue('link'),
+            language: (string) $this->getSoleValue('language'),
             categories: $this->getCategories(),
             explicit: $this->getSoleValue('itunes:explicit') === 'yes',
-            image: $this->getSoleValue('itunes:image@href'),
-            metadata: $this->getMetadata()
+            image: (string) $this->getSoleValue('itunes:image@href'),
+            metadata: $this->getMetadata(),
         );
     }
 
@@ -82,12 +73,6 @@ class Poddle
         });
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     private function getSoleValue(string ...$queries): ?string
     {
         try {
@@ -114,12 +99,6 @@ class Poddle
         }
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     private function getMetadata(): ChannelMetadata
     {
         return new ChannelMetadata(
@@ -134,12 +113,6 @@ class Poddle
         );
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     private function getFundings(): FundingCollection
     {
         return FundingCollection::fromXmlElements(
@@ -147,12 +120,6 @@ class Poddle
         );
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     private function getCategories(): CategoryCollection
     {
         return CategoryCollection::fromXmlElements(
@@ -160,12 +127,6 @@ class Poddle
         );
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     private function getTxts(): TxtCollection
     {
         return TxtCollection::fromXmlElements(
