@@ -4,8 +4,12 @@ namespace PhanAn\Poddle;
 
 use Generator;
 use GuzzleHttp\Psr7\Request;
+use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use PhanAn\Poddle\Cache\CacheConfig;
+use PhanAn\Poddle\Cache\CacheContext;
+use PhanAn\Poddle\Cache\CachedPoddleFactory;
 use PhanAn\Poddle\Enums\PodcastType;
 use PhanAn\Poddle\Values\CategoryCollection;
 use PhanAn\Poddle\Values\Channel;
@@ -24,17 +28,27 @@ use VeeWee\Xml\Encoding\Exception\EncodingException;
 class Poddle
 {
     public readonly XmlReader $xmlReader;
+    public readonly ?CacheContext $cacheContext;
 
-    public function __construct(public readonly string $xml)
+    public function __construct(public readonly string $xml, ?CacheContext $cacheContext = null)
     {
+        $this->cacheContext = $cacheContext;
         $this->xmlReader = XmlReader::fromString($xml);
     }
 
-    public static function fromUrl(string $url, int $timeoutInSeconds = 30, ?ClientInterface $client = null): self
-    {
+    public static function fromUrl(
+        string $url,
+        int $timeoutInSeconds = 30,
+        ?ClientInterface $client = null,
+        ?CacheConfig $cacheConfig = null
+    ): self {
+        if ($cacheConfig?->enabled) {
+            return CachedPoddleFactory::fromConfig($cacheConfig)->fromUrl($url, $timeoutInSeconds, $client);
+        }
+
         $xml = $client
             ? $client->sendRequest(new Request('GET', $url, ['timeout' => (string) $timeoutInSeconds]))->getBody()
-            : Http::timeout($timeoutInSeconds)->get($url)->body();
+            : self::http()->timeout($timeoutInSeconds)->get($url)->body();
 
         return new self((string) $xml);
     }
@@ -42,6 +56,18 @@ class Poddle
     public static function fromXml(string $xml): self
     {
         return new self($xml);
+    }
+
+    public static function fromXmlWithCache(string $xml, string $feedUrl, CacheConfig $cacheConfig): self
+    {
+        return CachedPoddleFactory::fromConfig($cacheConfig)->fromXml($feedUrl, $xml);
+    }
+
+    private static function http(): Factory
+    {
+        return Http::getFacadeRoot() instanceof Factory
+            ? Http::getFacadeRoot()
+            : new Factory();
     }
 
     /**

@@ -145,6 +145,7 @@ class PoddleTest extends TestCase
                 'image' => null,
                 'explicit' => false,
                 'transcripts' => [],
+                'keywords' => [],
                 'episode' => null,
                 'season' => null,
                 'type' => 'trailer',
