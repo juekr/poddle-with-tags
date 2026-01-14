@@ -15,7 +15,12 @@
             <title>Phan An</title>
             <link>https://phanan.net</link>
         </image>
-        <atom:link rel="self" type="application/rss+xml" title="Podcast Feed Parser" href="https://phanan.net"/>
+        <atom:link
+            rel="self"
+            type="application/rss+xml"
+            title="Podcast Feed Parser"
+            href="https://phanan.net/feed.xml"
+        />
         <language>en-US</language>
         <generator>Rice Cooker</generator>
         <copyright>Phan An © 2024</copyright>
