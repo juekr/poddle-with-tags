@@ -6,17 +6,21 @@ use Illuminate\Support\Arr;
 
 class Channel extends Serializable
 {
+    /** Alias for the channel's URL. */
+    public string $atomLink;
+
     public function __construct(
         public readonly string $url,
         public readonly string $title,
         public readonly string $description,
-        public readonly ?string $link, // https://github.com/phanan/poddle/issues/5
+        public readonly string $link,
         public readonly string $language,
         public readonly CategoryCollection $categories,
         public readonly bool $explicit,
         public readonly string $image,
         public readonly ChannelMetadata $metadata,
     ) {
+        $this->atomLink = $this->url;
     }
 
     public static function fromArray(array $data): static
@@ -38,6 +42,7 @@ class Channel extends Serializable
     {
         return [
             'url' => $this->url,
+            'atom_link' => $this->atomLink,
             'title' => $this->title,
             'description' => $this->description,
             'link' => $this->link,

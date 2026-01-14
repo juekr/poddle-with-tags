@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:podcast="https://podcastindex.org/namespace/1.0">
+
+    <channel>
+        <title>Podcast Feed Parser (Updated)</title>
+        <link>https://github.com/phanan/podcast-feed-parser</link>
+        <description><![CDATA[Parse podcast feeds with PHP following PSP-1 Podcast RSS Standard]]></description>
+        <lastBuildDate>Thu, 02 May 2024 06:44:38 +0000</lastBuildDate>
+
+        <image>
+            <url>https://github.com/phanan.png</url>
+            <title>Phan An</title>
+            <link>https://phanan.net</link>
+        </image>
+        <atom:link rel="self" type="application/rss+xml" title="Podcast Feed Parser" href="https://phanan.net"/>
+        <language>en-US</language>
+        <generator>Rice Cooker</generator>
+        <copyright>Phan An © 2024</copyright>
+        <itunes:author>Phan An (phanan)</itunes:author>
+        <itunes:type>episodic</itunes:type>
+        <itunes:category text="News">
+            <itunes:category text="Tech News"/>
+        </itunes:category>
+
+        <itunes:image href="https://github.com/phanan.png"/>
+        <itunes:block>no</itunes:block>
+        <itunes:explicit>no</itunes:explicit>
+
+        <podcast:funding url="https://github.com/sponsors/phanan">Sponsor me on GitHub</podcast:funding>
+        <podcast:funding url="https://opencollective.com/koel">My other Open Collective</podcast:funding>
+
+        <podcast:txt>naj3eEZaWVVY9a38uhX8FekACyhtqP4JN</podcast:txt>
+        <podcast:txt purpose="verify">S6lpp-7ZCn8-dZfGc-OoyaG</podcast:txt>
+
+        <item>
+            <itunes:episodeType>full</itunes:episodeType>
+            <itunes:title>Updated Episode</itunes:title>
+            <description><![CDATA[Updated content]]></description>
+            <enclosure
+                length="498537"
+                type="audio/mpeg"
+                url="http://example.com/podcasts/everything/UpdatedEpisode.mp3"
+            />
+            <guid>D03EEC9B-B1B4-475B-92C8-54F853FA2A99</guid>
+            <pubDate>Tue, 8 Jan 2020 01:15:00 GMT</pubDate>
+            <itunes:duration>1200</itunes:duration>
+            <itunes:explicit>false</itunes:explicit>
+        </item>
+    </channel>
+</rss>

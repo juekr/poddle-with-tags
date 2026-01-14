@@ -4,8 +4,12 @@ namespace PhanAn\Poddle;
 
 use Generator;
 use GuzzleHttp\Psr7\Request;
+use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use PhanAn\Poddle\Cache\CacheConfig;
+use PhanAn\Poddle\Cache\CacheContext;
+use PhanAn\Poddle\Cache\CachedPoddleFactory;
 use PhanAn\Poddle\Enums\PodcastType;
 use PhanAn\Poddle\Values\CategoryCollection;
 use PhanAn\Poddle\Values\Channel;
@@ -15,26 +19,33 @@ use PhanAn\Poddle\Values\EpisodeCollection;
 use PhanAn\Poddle\Values\FundingCollection;
 use PhanAn\Poddle\Values\TxtCollection;
 use Psr\Http\Client\ClientInterface;
-use Saloon\XmlWrangler\Exceptions\QueryAlreadyReadException;
-use Saloon\XmlWrangler\Exceptions\XmlReaderException;
 use Saloon\XmlWrangler\XmlReader;
 use Throwable;
-use VeeWee\Xml\Encoding\Exception\EncodingException;
 
 class Poddle
 {
     public readonly XmlReader $xmlReader;
+    public readonly ?CacheContext $cacheContext;
 
-    public function __construct(public readonly string $xml)
+    public function __construct(public readonly string $xml, ?CacheContext $cacheContext = null)
     {
+        $this->cacheContext = $cacheContext;
         $this->xmlReader = XmlReader::fromString($xml);
     }
 
-    public static function fromUrl(string $url, int $timeoutInSeconds = 30, ?ClientInterface $client = null): self
-    {
+    public static function fromUrl(
+        string $url,
+        int $timeoutInSeconds = 30,
+        ?ClientInterface $client = null,
+        ?CacheConfig $cacheConfig = null
+    ): self {
+        if ($cacheConfig?->enabled) {
+            return CachedPoddleFactory::fromConfig($cacheConfig)->fromUrl($url, $timeoutInSeconds, $client);
+        }
+
         $xml = $client
             ? $client->sendRequest(new Request('GET', $url, ['timeout' => (string) $timeoutInSeconds]))->getBody()
-            : Http::timeout($timeoutInSeconds)->get($url)->body();
+            : self::http()->timeout($timeoutInSeconds)->get($url)->body();
 
         return new self((string) $xml);
     }
@@ -42,6 +53,18 @@ class Poddle
     public static function fromXml(string $xml): self
     {
         return new self($xml);
+    }
+
+    public static function fromXmlWithCache(string $xml, string $feedUrl, CacheConfig $cacheConfig): self
+    {
+        return CachedPoddleFactory::fromConfig($cacheConfig)->fromXml($feedUrl, $xml);
+    }
+
+    private static function http(): Factory
+    {
+        return Http::getFacadeRoot() instanceof Factory
+            ? Http::getFacadeRoot()
+            : new Factory();
     }
 
     /**
@@ -53,15 +76,15 @@ class Poddle
     public function getChannel(): Channel
     {
         return new Channel(
-            url: $this->getSoleValue('atom:link@href'),
-            title: $this->getSoleValue('title'),
-            description: $this->getSoleValue('description'),
-            link: $this->getSoleValue('link'),
-            language: $this->getSoleValue('language'),
+            url: (string) $this->getSoleValue('atom:link@href'),
+            title: (string) $this->getSoleValue('title'),
+            description: (string) $this->getSoleValue('description'),
+            link: (string) $this->getSoleValue('link'),
+            language: (string) $this->getSoleValue('language'),
             categories: $this->getCategories(),
             explicit: $this->getSoleValue('itunes:explicit') === 'yes',
-            image: $this->getSoleValue('itunes:image@href'),
-            metadata: $this->getMetadata()
+            image: (string) $this->getSoleValue('itunes:image@href'),
+            metadata: $this->getMetadata(),
         );
     }
 
@@ -82,12 +105,6 @@ class Poddle
         });
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     private function getSoleValue(string ...$queries): ?string
     {
         try {
@@ -114,12 +131,6 @@ class Poddle
         }
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     private function getMetadata(): ChannelMetadata
     {
         return new ChannelMetadata(
@@ -134,12 +145,6 @@ class Poddle
         );
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     private function getFundings(): FundingCollection
     {
         return FundingCollection::fromXmlElements(
@@ -147,12 +152,6 @@ class Poddle
         );
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     private function getCategories(): CategoryCollection
     {
         return CategoryCollection::fromXmlElements(
@@ -160,12 +159,6 @@ class Poddle
         );
     }
 
-    /**
-     * @throws EncodingException
-     * @throws QueryAlreadyReadException
-     * @throws Throwable
-     * @throws XmlReaderException
-     */
     private function getTxts(): TxtCollection
     {
         return TxtCollection::fromXmlElements(

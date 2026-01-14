@@ -24,7 +24,7 @@ class EpisodeMetadata extends Serializable
         public readonly ?int $season,
         public readonly ?EpisodeType $type,
         public readonly ?bool $block,
-        public readonly ?string $keywords,
+        public readonly KeywordCollection $keywords,
     ) {
     }
 
@@ -45,7 +45,7 @@ class EpisodeMetadata extends Serializable
             season: optional(Arr::get($content, 'itunes:season')?->getContent(), 'intval'),
             type: EpisodeType::tryFrom(Arr::get($content, 'itunes:episodeType')?->getContent() ?? ''),
             block: Arr::get($content, 'itunes:block')?->getContent() === 'yes',
-            keywords: Arr::get($content, 'itunes:keywords')?->getContent() ?? ''),
+            keywords: KeywordCollection::fromString(Arr::get($content, 'itunes:keywords')?->getContent())
         );
     }
 
@@ -66,7 +66,7 @@ class EpisodeMetadata extends Serializable
                 Arr::get($data, 'block'),
                 static fn ($value) => filter_var($value, FILTER_VALIDATE_BOOLEAN)
             ),
-            keywords: optional(Arr::get($data, 'keywords'), 'string'),
+            keywords: KeywordCollection::fromMixed(Arr::get($data, 'keywords')),
         );
     }
 
@@ -127,7 +127,7 @@ class EpisodeMetadata extends Serializable
             'season' => $this->season,
             'type' => $this->type?->value,
             'block' => $this->block,
-            'keywords' => array_map('trim', explode(',', $this->keywords))
+            'keywords' => $this->keywords->toArray(),
         ];
     }
 }

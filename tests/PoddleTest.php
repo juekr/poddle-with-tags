@@ -10,25 +10,29 @@ use PhanAn\Poddle\Poddle;
 use PhanAn\Poddle\Values\Channel;
 use PhanAn\Poddle\Values\Episode;
 use PhanAn\Poddle\Values\EpisodeCollection;
+use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class PoddleTest extends TestCase
 {
-    public function testGetChannel(): void
+    #[Test]
+    public function getChannel(): void
     {
         $channel = Poddle::fromXml(file_get_contents(__DIR__ . '/fixtures/sample.xml'))->getChannel();
-        self::assertChannel($channel);
+        self::assertSampleChannel($channel);
     }
 
-    public function testGetEpisodes(): void
+    #[Test]
+    public function getEpisodes(): void
     {
         $episodes = Poddle::fromXml(file_get_contents(__DIR__ . '/fixtures/sample.xml'))->getEpisodes();
-        self::assertEpisodes($episodes);
+        self::assertSampleEpisodes($episodes);
     }
 
-    public function testParseUrl(): void
+    #[Test]
+    public function parseUrl(): void
     {
         Http::fake([
             'https://mypodcast.com/feed' => Http::response(file_get_contents(__DIR__ . '/fixtures/sample.xml'))
@@ -36,11 +40,12 @@ class PoddleTest extends TestCase
 
         $parser = Poddle::fromUrl('https://mypodcast.com/feed');
 
-        self::assertChannel($parser->getChannel());
-        self::assertEpisodes($parser->getEpisodes());
+        self::assertSampleChannel($parser->getChannel());
+        self::assertSampleEpisodes($parser->getEpisodes());
     }
 
-    public function testParseUrlUsingClientInterface(): void
+    #[Test]
+    public function parseUrlUsingClientInterface(): void
     {
         $clientMock = Mockery::mock(ClientInterface::class);
 
@@ -64,14 +69,22 @@ class PoddleTest extends TestCase
             client: $clientMock
         );
 
-        self::assertChannel($parser->getChannel());
-        self::assertEpisodes($parser->getEpisodes());
+        self::assertSampleChannel($parser->getChannel());
+        self::assertSampleEpisodes($parser->getEpisodes());
     }
 
-    private static function assertChannel(Channel $channel): void
+    #[Test]
+    public function channelWithoutUrl(): void
+    {
+        Poddle::fromXml(file_get_contents(__DIR__ . '/fixtures/empty-channel-url.xml'))->getChannel();
+        self::addToAssertionCount(1);
+    }
+
+    private static function assertSampleChannel(Channel $channel): void
     {
         self::assertEquals([
-            'url' => 'https://phanan.net',
+            'url' => 'https://phanan.net/feed.xml',
+            'atom_link' => 'https://phanan.net/feed.xml',
             'title' => 'Podcast Feed Parser',
             'description' => 'Parse podcast feeds with PHP following PSP-1 Podcast RSS Standard',
             'link' => 'https://github.com/phanan/podcast-feed-parser',
@@ -118,7 +131,7 @@ class PoddleTest extends TestCase
         ], $channel->toArray());
     }
 
-    private function assertEpisodes(EpisodeCollection $episodes): void
+    private function assertSampleEpisodes(EpisodeCollection $episodes): void
     {
         self::assertInstanceOf(LazyCollection::class, $episodes);
         self::assertSame(8, $episodes->count());
@@ -145,6 +158,7 @@ class PoddleTest extends TestCase
                 'image' => null,
                 'explicit' => false,
                 'transcripts' => [],
+                'keywords' => [],
                 'episode' => null,
                 'season' => null,
                 'type' => 'trailer',

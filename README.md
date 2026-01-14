@@ -49,18 +49,16 @@ $channel = $poddle->getChannel();
 All channel's [required elements](https://github.com/Podcast-Standards-Project/PSP-1-Podcast-RSS-Specification#required-channel-elements) per the PSP-1 standard are available as properties on the `Channel` object:
 
 ```php
+$channel->url; // string
+$channel->atomLink; // string. Alias of $channel->url
 $channel->title; // string
-$channel->link; // ?string
+$channel->link; // string
 $channel->description; // string
 $channel->language; // string
 $channel->image; // string
 $channel->categories; // \PhanAn\Poddle\Values\CategoryCollection<\PhanAn\Poddle\Values\Category>
 $channel->explicit; // bool
 ```
-
-> [!NOTE]
-> Although required by the standard, `link` isn't supplied by all feeds, including some bigger players like Spotify's [Megaphone](https://megaphone.spotify.com/).
-> As such, `link` is nullable in Poddle.
 
 All channel’s [recommended elements](https://github.com/Podcast-Standards-Project/PSP-1-Podcast-RSS-Specification#recommended-channel-elements) are available via the `metadata` property:
 
@@ -113,11 +111,46 @@ $episode->metadata->duration; // ?int
 $episode->metadata->image; // ?string
 $episode->metadata->explicit; // ?bool
 $episode->metadata->transcripts; // \PhanAn\Poddle\Values\TranscriptCollection<\PhanAn\Poddle\Values\Transcript>
+$episode->metadata->keywords; // \PhanAn\Poddle\Values\KeywordCollection<string>
 $episode->metadata->episode; // ?int
 $episode->metadata->season; // ?int
 $episode->metadata->type; // ?\PhanAn\Poddle\Values\EpisodeType
 $episode->metadata->block; // ?bool
 ```
+
+## SQLite Caching
+
+Poddle ships with an opt-in SQLite caching layer that keeps parsed feeds on disk. The cache is database-first (returns cached data when valid) and refreshes when entries are stale or checksums change.
+
+```php
+use PhanAn\Poddle\Cache\CacheConfig;
+use PhanAn\Poddle\Poddle;
+
+$config = new CacheConfig(
+    enabled: true,
+    maxAgeSeconds: 3600,              // cache age threshold
+    forceRefresh: false,              // bypass cache and fetch live
+    databasePath: __DIR__ . '/poddle-cache.sqlite',
+    refreshOnStale: true              // trigger background refresh when serving stale cache
+);
+
+$poddle = Poddle::fromUrl('https://example.com/feed', cacheConfig: $config);
+$poddle->cacheContext?->fromCache(); // true if served from cache
+
+// If you already have the XML string but still want caching:
+$poddle = Poddle::fromXmlWithCache($xmlString, 'https://example.com/feed', $config);
+```
+
+Details:
+
+- Cache validity: based on age (`maxAgeSeconds`) and checksum of the feed XML. Stale caches either trigger a background refresh (`refreshOnStale`) or are refreshed immediately.
+- Multi-podcast support: the SQLite file stores multiple feeds, keyed by `feed_url`.
+- Tables: podcasts, channels, episodes, categories, fundings, txts, transcripts, and keywords are stored separately for full CRUD.
+- CRUD helpers: use `PhanAn\Poddle\Cache\CacheManager` (`CacheManager::make($config)`) to upsert episodes, update channels, or clear a podcast’s cache.
+- Source visibility: `Poddle::$cacheContext` exposes `source` (`cache` or `live`) and whether the cache was stale.
+- Backup: the cache is a single SQLite file; e.g. `scp /path/to/poddle-cache.sqlite user@host:/backups/`.
+
+You can point `databasePath` to a temp file for testing or to a shared location for reuse. Provide a `refreshCallback` in `CacheConfig` to schedule background refreshes (queue/cron) when stale data is served.
 
 ### Other Elements and Values
 

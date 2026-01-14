@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/podcastics/podcasts/rss-rendering/rss.xsl"?>
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:podcast="https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md" version="2.0">
+    <channel>
+        <generator>Podcastics</generator>
+        <lastBuildDate>Mon, 05 Jan 2026 16:03:02 +0000</lastBuildDate>
+        <itunes:new-feed-url>https://feeds.podcastics.com/podcastics/podcasts/rss/6752_3835135c9f500b9c5711db83d9b202a5.rss</itunes:new-feed-url>
+        <title>Le Moyen-Âge dans tes Oreilles</title>
+        <language>fr</language>
+        <link>https://www.podcastics.com/podcast/le-moyen-age-dans-tes-oreilles/</link>
+        <itunes:type>episodic</itunes:type>
+        <itunes:author>Le Moyen-Âge dans tes Oreilles</itunes:author>
+        <itunes:owner>
+            <itunes:name>Le Moyen-Âge dans tes Oreilles</itunes:name>
+            <itunes:email>moyenagedanstesoreilles@gmail.com</itunes:email>
+        </itunes:owner>
+        <copyright>MDTO</copyright>
+        <itunes:category text="History" />
+        <itunes:explicit>no</itunes:explicit>
+        <itunes:image href="https://medias.podcastics.com/podcastics/podcasts/artwork/le-moyen-age-dans-tes-oreilles.png.762e1b8e910e00e3d06c3e44870c0065.png" />
+        <description><![CDATA[<p>Bienvenue dans le Moyen-Âge dans tes oreilles, le podcast qui vous plonge dans cette période fascinante de notre histoire. Guerres, épidémies, meurtres et trahisons, mais aussi arts, avancées scientifiques, foi et philosophie, laissez-moi vous raconter le Moyen-Âge comme si vous y étiez vraiment...</p>]]></description>
+        <item>
+            <title>Sommets enneigés et fromage fondant : la montagne au Moyen Âge</title>
+            <pubDate>Mon, 05 Jan 2026 16:00:00 +0000</pubDate>
+            <enclosure url="https://track.podcastics.com/6752/398006.mp3" type="audio/mpeg" length="179353599" />
+            <guid isPermaLink="false">398006</guid>
+            <itunes:duration>01:14:44</itunes:duration>
+            <itunes:season>5</itunes:season>
+            <podcast:season>5</podcast:season>
+            <itunes:episode>30</itunes:episode>
+            <podcast:episode>30</podcast:episode>
+            <itunes:episodeType>full</itunes:episodeType>
+            <itunes:explicit>no</itunes:explicit>
+            <itunes:image href="https://medias.podcastics.com/podcastics/episodes/6752/artwork/sommets-enneiges-et-fromage-fondant-la-montagne-au-moyen-age-le-moyen-age-dans-tes-oreilles.png.4b2b0a1dfd2c4810717be35fe997fb9e.png" />
+            <itunes:author>Le Moyen-Âge dans tes Oreilles</itunes:author>
+            <link>https://www.podcastics.com/podcast/episode/sommets-enneiges-et-fromage-fondant-la-montagne-au-moyen-age-398006/</link>
+            <description><![CDATA[<p>La montagne, ça vous évoque quoi ? Des pistes de ski immaculées fraîchement damées ou des randonnées d’une beauté à couper le souffle, des chalets de bois nichés dans le creux des vallées et des raclettes au feu de bois une fois la nuit tombée ? Eh bien au Moyen Âge on a déjà un peu de tout ça, mais vous allez voir que la vie des montagnards était tout de même bien différente du paradis touristique que je vous décris ! Là, il va plutôt falloir sortir les polaires, les chaussures à crampons et les cordes d’escalade car on ne s’aventure pas inconsciemment dans la montagne médiévale. C’est bon, vous avez tout ? Même le stick à lèvres ? Alors accrochez-vous bien, c’est parti !</p><p><strong>Comment me soutenir ?</strong></p><p><strong>Ma page Patreon :</strong><a href="https://www.patreon.com/moyenagedanstesoreilles" ipsnoembed="true" rel="external nofollow payment" target="_blank">https://www.patreon.com/moyenagedanstesoreilles</a> </p><p><strong>Ma boutique : </strong><a href="https://www.patreon.com/moyenagedanstesoreilles/shop" ipsnoembed="true" rel="external nofollow payment" target="_blank">https://www.patreon.com/moyenagedanstesoreilles/shop</a> </p><p><strong>Mes réseaux sociaux :</strong></p><p><strong>Instagram :</strong> <a href="https://www.instagram.com/moyenagedanstesoreilles/" ipsnoembed="true" rel="external nofollow" target="_blank">https://www.instagram.com/moyenagedanstesoreilles/</a> </p><p><strong>Facebook : </strong><a href="https://www.facebook.com/p/Le-Moyen-%C3%82ge-dans-tes-Oreilles-100089191720744/" ipsnoembed="true" rel="external nofollow" target="_blank">https://www.facebook.com/p/Le-Moyen-Âge-dans-tes-Oreilles-100089191720744/</a> </p><p><strong>E-mail :</strong> moyenagedanstesoreilles@gmail.com   </p><p> </p><p><strong>Bibliographie</strong></p><p> </p><p>Société des historiens médiévistes de l’enseignement supérieur public, <em>Montagnes médiévales</em>, XXXIVème Congrès de la SHMESP, Éditions de la Sorbonne 2019</p><p>Nicolas Carrier, <em>Paysans des Alpes : les communautés montagnardes au Moyen Âge</em>, PUR 2010</p><p>Anne-Marie Grannet-Abisset, <em>Ecosystèmes montagnards du Moyen Âge à nos jours</em>, Presses universitaires de Grenoble 2025</p><p>Charles Kraemer et Jacky Koch, <em>Vivre dans la montagne vosgienne au Moyen Âge</em>, Nancy 2017 </p><p>Stéphane Gal (dir.), <em>Des chevaliers dans la montagne</em>, UGA Editions 2021</p><p>Stéphane Gal, <em>Une histoire de l’escalade. 1492, aux origines de l’alpinisme</em>, Editions Arkhè 2024</p><p>France Culture, <em>Tutoyer les sommets, histoires verticales de la montagne</em>, avec Stéphane Gal et Anne Montenach, émission du 27 décembre 2021</p><p><br><strong>Crédits musicaux</strong></p><p>Vox Vulgaris - <em>Cantiga 166</em></p><p>Russell Brower, Derek Duke - <em>Howling Fjord</em></p><p>Steven Price - <em>The Bait Ball</em></p><p>Bric a Drac - <em>Danse des Serfs</em></p><p>Neal Acree - <em>The Dark Portal</em></p><p>Vangelis - <em>Across the Mountains</em></p><p> </p><p><strong>Membre du Label Tout Savoir. Régies publicitaires : PodK et Ketil Media</strong></p>]]></description>
+        </item>
+    </channel>
+</rss>
