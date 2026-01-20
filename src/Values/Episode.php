@@ -13,7 +13,8 @@ class Episode extends Serializable
         public readonly string $title,
         public readonly EpisodeGuid $guid,
         public readonly Enclosure $enclosure,
-        public readonly EpisodeMetadata $metadata
+        public readonly EpisodeMetadata $metadata,
+        public readonly Shownotes $shownotes
     ) {
     }
 
@@ -24,6 +25,7 @@ class Episode extends Serializable
             guid: EpisodeGuid::fromArray(Arr::get($data, 'guid')),
             enclosure: Enclosure::fromArray(Arr::get($data, 'enclosure')),
             metadata: EpisodeMetadata::fromArray(Arr::get($data, 'metadata', [])),
+            shownotes: Shownotes::fromArray(Arr::get($data, 'shownotes')),
         );
     }
 
@@ -37,7 +39,8 @@ class Episode extends Serializable
                 title: Arr::get($content, 'title', Arr::get($content, 'itunes:title'))->getContent(),
                 guid: EpisodeGuid::fromXmlElement(Arr::get($content, 'guid')),
                 enclosure: Enclosure::fromXmlElement(Arr::get($content, 'enclosure')),
-                metadata: EpisodeMetadata::fromXmlElement($item)
+                metadata: EpisodeMetadata::fromXmlElement($item),
+                shownotes: Shownotes::fromXmlElement(Arr::get($content, 'content:encoded'))
             );
         } catch (Throwable $exception) {
             throw new InvalidEpisodeElementException($exception);
@@ -52,6 +55,7 @@ class Episode extends Serializable
             'guid' => $this->guid->toArray(),
             'enclosure' => $this->enclosure->toArray(),
             'metadata' => $this->metadata->toArray(),
+            'shownotes' => $this->shownotes->toArray(),
         ];
     }
 }
