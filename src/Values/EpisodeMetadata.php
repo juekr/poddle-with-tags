@@ -20,6 +20,7 @@ class EpisodeMetadata extends Serializable
         public readonly ?string $image,
         public readonly ?bool $explicit,
         public readonly TranscriptCollection $transcripts,
+        public readonly ChapterCollection $chapters,
         public readonly ?int $episode,
         public readonly ?int $season,
         public readonly ?EpisodeType $type,
@@ -41,6 +42,12 @@ class EpisodeMetadata extends Serializable
             image: Arr::get($content, 'itunes:image')?->getAttribute('href'),
             explicit: Arr::get($content, 'itunes:explicit')?->getContent() === 'true',
             transcripts: self::getTranscripts(Arr::get($content, 'podcast:transcript')),
+            chapters: self::getChapters(
+                Arr::get($content, 'podcast:chapters')
+                ?? Arr::get($content, 'psc:chapters')
+                ?? Arr::get($content, 'podcast:chapter')
+                ?? Arr::get($content, 'psc:chapter')
+            ),
             episode: optional(Arr::get($content, 'itunes:episode')?->getContent(), 'intval'),
             season: optional(Arr::get($content, 'itunes:season')?->getContent(), 'intval'),
             type: EpisodeType::tryFrom(Arr::get($content, 'itunes:episodeType')?->getContent() ?? ''),
@@ -59,6 +66,7 @@ class EpisodeMetadata extends Serializable
             image: Arr::get($data, 'image'),
             explicit: Arr::get($data, 'explicit'),
             transcripts: TranscriptCollection::fromArray(Arr::get($data, 'transcripts', [])),
+            chapters: ChapterCollection::fromArray(Arr::get($data, 'chapters', [])),
             episode: optional(Arr::get($data, 'episode'), 'intval'),
             season: optional(Arr::get($data, 'season'), 'intval'),
             type: EpisodeType::tryFrom(Arr::get($data, 'type') ?? ''),
@@ -85,6 +93,68 @@ class EpisodeMetadata extends Serializable
         }
 
         return TranscriptCollection::fromXmlElements($value);
+    }
+
+    private static function getChapters(Element|array|null $value): ChapterCollection
+    {
+        if (!$value) {
+            return new ChapterCollection();
+        }
+
+        if ($value instanceof Element) {
+            $content = $value->getContent();
+
+            if ($content instanceof Element) {
+                return ChapterCollection::fromXmlElements([$content]);
+            }
+
+            if (!is_array($content)) {
+                $externalUrl = $value->getAttribute('url') ?? $value->getAttribute('href');
+
+                return $externalUrl
+                    ? ChapterCollection::fromExternalUrl($externalUrl)
+                    : new ChapterCollection();
+            }
+
+            $elements = [];
+
+            foreach ($content as $chapter) {
+                if ($chapter instanceof Element) {
+                    $chapterContent = $chapter->getContent();
+
+                    if (is_array($chapterContent)) {
+                        foreach ($chapterContent as $nested) {
+                            if ($nested instanceof Element) {
+                                $elements[] = $nested;
+                            }
+                        }
+                    } else {
+                        $elements[] = $chapter;
+                    }
+                    continue;
+                }
+
+                if (is_array($chapter)) {
+                    foreach ($chapter as $nested) {
+                        if ($nested instanceof Element) {
+                            $elements[] = $nested;
+                        }
+                    }
+                }
+            }
+
+            if ($elements !== []) {
+                return ChapterCollection::fromXmlElements($elements);
+            }
+
+            $externalUrl = $value->getAttribute('url') ?? $value->getAttribute('href');
+
+            return $externalUrl
+                ? ChapterCollection::fromExternalUrl($externalUrl)
+                : new ChapterCollection();
+        }
+
+        return ChapterCollection::fromXmlElements($value);
     }
 
     private static function parseDateTime(?string $input): ?DateTime
@@ -123,6 +193,7 @@ class EpisodeMetadata extends Serializable
             'image' => $this->image,
             'explicit' => $this->explicit,
             'transcripts' => $this->transcripts->toArray(),
+            'chapters' => $this->chapters->toArray(),
             'episode' => $this->episode,
             'season' => $this->season,
             'type' => $this->type?->value,
