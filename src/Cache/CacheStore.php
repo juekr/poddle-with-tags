@@ -6,6 +6,7 @@ use PDO;
 use PDOException;
 use PhanAn\Poddle\Values\Category;
 use PhanAn\Poddle\Values\Channel;
+use PhanAn\Poddle\Values\Chapter;
 use PhanAn\Poddle\Values\Episode;
 use PhanAn\Poddle\Values\Funding;
 use PhanAn\Poddle\Values\Transcript;
@@ -72,7 +73,7 @@ class CacheStore
         $this->pdo->beginTransaction();
 
         try {
-            foreach (['categories', 'fundings', 'txts', 'episodes', 'transcripts', 'keywords', 'channels', 'podcasts'] as $table) {
+            foreach (['categories', 'fundings', 'txts', 'episodes', 'transcripts', 'keywords', 'chapters', 'channels', 'podcasts'] as $table) {
                 $this->pdo->prepare("DELETE FROM {$table} WHERE podcast_id = :podcast_id")->execute([
                     'podcast_id' => $podcastId,
                 ]);
@@ -107,6 +108,11 @@ class CacheStore
             ]);
 
             $this->pdo->prepare('DELETE FROM keywords WHERE podcast_id = :podcast_id AND episode_guid = :guid')->execute([
+                'podcast_id' => $podcastId,
+                'guid' => $guid,
+            ]);
+
+            $this->pdo->prepare('DELETE FROM chapters WHERE podcast_id = :podcast_id AND episode_guid = :guid')->execute([
                 'podcast_id' => $podcastId,
                 'guid' => $guid,
             ]);
@@ -152,6 +158,11 @@ class CacheStore
             ]);
 
             $this->pdo->prepare('DELETE FROM keywords WHERE podcast_id = :podcast_id AND episode_guid = :guid')->execute([
+                'podcast_id' => $podcastId,
+                'guid' => $episode->guid->value,
+            ]);
+
+            $this->pdo->prepare('DELETE FROM chapters WHERE podcast_id = :podcast_id AND episode_guid = :guid')->execute([
                 'podcast_id' => $podcastId,
                 'guid' => $episode->guid->value,
             ]);
@@ -299,7 +310,7 @@ class CacheStore
 
     private function persistEpisodes(int $podcastId, iterable $episodes): void
     {
-        foreach (['episodes', 'transcripts', 'keywords'] as $table) {
+        foreach (['episodes', 'transcripts', 'keywords', 'chapters'] as $table) {
             $this->pdo->prepare("DELETE FROM {$table} WHERE podcast_id = :podcast_id")->execute([
                 'podcast_id' => $podcastId,
             ]);
@@ -358,6 +369,26 @@ class CacheStore
                 'podcast_id' => $podcastId,
                 'episode_guid' => $episode->guid->value,
                 'keyword' => $keyword,
+            ]);
+        }
+
+        $insertChapter = $this->pdo->prepare(
+            <<<SQL
+            INSERT INTO chapters (podcast_id, episode_guid, position, start, title, url, image)
+            VALUES (:podcast_id, :episode_guid, :position, :start, :title, :url, :image)
+            SQL
+        );
+
+        /** @var Chapter $chapter */
+        foreach ($episode->metadata->chapters as $index => $chapter) {
+            $insertChapter->execute([
+                'podcast_id' => $podcastId,
+                'episode_guid' => $episode->guid->value,
+                'position' => (int) $index,
+                'start' => $chapter->start,
+                'title' => $chapter->title,
+                'url' => $chapter->url,
+                'image' => $chapter->image,
             ]);
         }
     }
@@ -424,10 +455,21 @@ class CacheStore
                 keyword TEXT NOT NULL,
                 FOREIGN KEY (podcast_id) REFERENCES podcasts(id) ON DELETE CASCADE
             );
+            CREATE TABLE IF NOT EXISTS chapters (
+                podcast_id INTEGER NOT NULL,
+                episode_guid TEXT NOT NULL,
+                position INTEGER NOT NULL,
+                start TEXT,
+                title TEXT,
+                url TEXT,
+                image TEXT,
+                FOREIGN KEY (podcast_id) REFERENCES podcasts(id) ON DELETE CASCADE
+            );
             CREATE INDEX IF NOT EXISTS idx_podcasts_feed_url ON podcasts(feed_url);
             CREATE INDEX IF NOT EXISTS idx_episodes_guid ON episodes(guid);
             CREATE INDEX IF NOT EXISTS idx_keywords_episode ON keywords(episode_guid);
             CREATE INDEX IF NOT EXISTS idx_transcripts_episode ON transcripts(episode_guid);
+            CREATE INDEX IF NOT EXISTS idx_chapters_episode ON chapters(episode_guid);
             SQL
         );
     }
