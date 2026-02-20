@@ -136,6 +136,13 @@ class CacheTest extends TestCase
     private function ageCache(string $dbPath): void
     {
         $pdo = new \PDO('sqlite:' . $dbPath);
-        $pdo->exec('UPDATE podcasts SET fetched_at = fetched_at - 3600');
+        $pdo->exec('UPDATE podcasts SET last_updated = last_updated - 3600, fetched_at = fetched_at - 3600');
+        $pdo->exec('UPDATE episodes SET last_updated = last_updated - 3600');
+        $pdo->exec('UPDATE podcast_categories SET last_updated = last_updated - 3600');
+        $pdo->exec('UPDATE fundings SET last_updated = last_updated - 3600');
+        $pdo->exec('UPDATE txts SET last_updated = last_updated - 3600');
+        $pdo->exec('UPDATE transcripts SET last_updated = last_updated - 3600');
+        $pdo->exec('UPDATE episode_keywords SET last_updated = last_updated - 3600');
+        $pdo->exec('UPDATE chapters SET last_updated = last_updated - 3600');
     }
 }

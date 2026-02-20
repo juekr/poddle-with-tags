@@ -12,12 +12,22 @@ class CacheConfig
         public readonly bool $refreshOnStale = false,
         public readonly ?\Closure $refreshCallback = null,
         public readonly string $checksumAlgo = 'sha256',
-        public readonly ?\PDO $pdo = null
+        public readonly ?\PDO $pdo = null,
+        public readonly ?string $logPath = null
     ) {
     }
 
     public function path(): string
     {
         return $this->databasePath ?? sys_get_temp_dir() . '/poddle-cache.sqlite';
+    }
+
+    public function log(string $message): void
+    {
+        if ($this->logPath === null) {
+            return;
+        }
+
+        file_put_contents($this->logPath, $message . PHP_EOL, FILE_APPEND);
     }
 }

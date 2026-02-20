@@ -21,6 +21,26 @@ class CacheManager
         return $this->store->findPodcast($feedUrl);
     }
 
+    public function podcastGuid(string $feedUrl): ?string
+    {
+        return $this->store->getPodcastGuidByFeedUrl($feedUrl);
+    }
+
+    public function episodeChecksums(string $podcastGuid): array
+    {
+        return $this->store->getEpisodeChecksums($podcastGuid);
+    }
+
+    public function staleTimestamp(string $podcastGuid): ?int
+    {
+        return $this->store->getStaleTimestamp($podcastGuid);
+    }
+
+    public function touchPodcast(string $podcastGuid): void
+    {
+        $this->store->touchPodcast($podcastGuid);
+    }
+
     public function refreshPodcast(string $feedUrl, string $xml, Channel $channel, iterable $episodes, string $checksum): void
     {
         $this->store->persistPodcast($feedUrl, $xml, $channel, $episodes, $checksum);

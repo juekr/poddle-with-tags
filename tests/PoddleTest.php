@@ -158,12 +158,16 @@ class PoddleTest extends TestCase
                 'image' => null,
                 'explicit' => false,
                 'transcripts' => [],
+                'chapters' => [],
                 'keywords' => [],
                 'episode' => null,
                 'season' => null,
                 'type' => 'trailer',
                 'block' => false,
-            ]
+            ],
+            'shownotes' => [
+                'content' => null,
+            ],
         ], $firstEpisode->toArray());
     }
 }

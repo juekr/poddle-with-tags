@@ -1,0 +1,625 @@
+podcasts:
+  columns:
+    guid:
+      type: varchar
+      length: 255
+      primary: true
+    metadata_guid:
+      type: varchar
+      length: 255
+      nullable: true
+    feed_url:
+      type: text
+      nullable: true
+    url:
+      type: text
+      nullable: true
+    atom_link:
+      type: text
+      nullable: true
+    title:
+      type: varchar
+      length: 500
+      nullable: true
+    subtitle:
+      type: varchar
+      length: 500
+      nullable: true
+    description:
+      type: text
+      nullable: true
+    link:
+      type: text
+      nullable: true
+    pubdate:
+      type: datetime
+      nullable: true
+    author:
+      type: varchar
+      length: 255
+      nullable: true
+    contact:
+      type: varchar
+      length: 255
+      nullable: true
+    type:
+      type: enum
+      values: [episodic, season]
+      default: episodic
+    explicit:
+      type: boolean
+      nullable: true
+    image:
+      type: text
+      nullable: true
+    locked:
+      type: boolean
+      nullable: true
+    language:
+      type: varchar
+      length: 10
+      nullable: true
+    generator:
+      type: varchar
+      length: 255
+      nullable: true
+    copyright:
+      type: text
+      nullable: true
+    complete:
+      type: boolean
+      nullable: true
+    apple_id:
+      type: varchar
+      length: 100
+      nullable: true
+    pocket_casts_id:
+      type: varchar
+      length: 100
+      nullable: true
+    spotify_id:
+      type: varchar
+      length: 100
+      nullable: true
+    youtube_id:
+      type: varchar
+      length: 100
+      nullable: true
+    checksum:
+      type: text
+      nullable: true
+    channel_checksum:
+      type: text
+      nullable: true
+    xml:
+      type: text
+      nullable: true
+    fetched_at:
+      type: integer
+      nullable: true
+    last_updated:
+      type: integer
+      auto_timestamp: true
+  indexes:
+    - columns: [language]
+    - columns: [feed_url]
+  unique:
+    - columns: [feed_url]
+
+meta:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    podcast:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: podcasts
+        column: guid
+        on_delete: cascade
+    creation_date:
+      type: datetime
+    alive:
+      type: integer
+      default: 100
+    number_of_episodes:
+      type: integer
+      default: 0
+    frequency:
+      type: integer
+      nullable: true
+    location:
+      type: varchar
+      length: 255
+      nullable: true
+    first:
+      type: datetime
+      nullable: true
+    last:
+      type: datetime
+      nullable: true
+    last_updated:
+      type: datetime
+      auto_timestamp: true
+  indexes:
+    - columns: [podcast]
+
+urls:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    podcast:
+      type: varchar
+      length: 255
+      nullable: true
+      foreign_key:
+        table: podcasts
+        column: guid
+        on_delete: cascade
+    episode:
+      type: varchar
+      length: 255
+      nullable: true
+      foreign_key:
+        table: episodes
+        column: guid
+        on_delete: cascade
+    type:
+      type: enum
+      values: [link, feed, redirect-target, podcast_cover, episode_cover, episode, enclosure, funding, socials, new_feed_url, other]
+    details:
+      type: text
+      nullable: true
+    url:
+      type: text
+    last_updated:
+      type: datetime
+      auto_timestamp: true
+  indexes:
+    - columns: [podcast]
+    - columns: [episode]
+    - columns: [type]
+
+episodes:
+  columns:
+    guid:
+      type: varchar
+      length: 255
+      primary: true
+    guid_is_permalink:
+      type: boolean
+      nullable: true
+    podcast:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: podcasts
+        column: guid
+        on_delete: cascade
+    type:
+      type: enum
+      values: [trailer, bonus, full]
+      default: full
+    title:
+      type: varchar
+      length: 500
+      nullable: true
+    link:
+      type: text
+      nullable: true
+    pubdate:
+      type: datetime
+      nullable: true
+    keywords_raw:
+      type: text
+      nullable: true
+    shownotes:
+      type: text
+      nullable: true
+    description:
+      type: text
+      nullable: true
+    season:
+      type: integer
+      nullable: true
+    episode:
+      type: integer
+      nullable: true
+    duration:
+      type: integer
+      nullable: true
+    enclosure_url:
+      type: text
+      nullable: true
+    enclosure_type:
+      type: varchar
+      length: 100
+      nullable: true
+    enclosure_length:
+      type: integer
+      nullable: true
+    image:
+      type: text
+      nullable: true
+    explicit:
+      type: boolean
+      nullable: true
+    blocked:
+      type: boolean
+      default: false
+    checksum:
+      type: text
+      nullable: true
+    last_updated:
+      type: integer
+      auto_timestamp: true
+  indexes:
+    - columns: [podcast]
+    - columns: [type]
+
+podcast_categories:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    podcast:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: podcasts
+        column: guid
+        on_delete: cascade
+    text:
+      type: varchar
+      length: 255
+    sub_text:
+      type: varchar
+      length: 255
+      nullable: true
+    last_updated:
+      type: integer
+      auto_timestamp: true
+  indexes:
+    - columns: [podcast]
+
+episode_keywords:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    episode:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: episodes
+        column: guid
+        on_delete: cascade
+    keyword:
+      type: varchar
+      length: 256
+    last_updated:
+      type: integer
+      auto_timestamp: true
+  indexes:
+    - columns: [episode]
+
+keywords:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    keyword:
+      type: varchar
+      length: 256
+    duplicate_of:
+      type: integer
+      nullable: true
+      foreign_key:
+        table: keywords
+        column: id
+        on_delete: set_null
+    slugified:
+      type: varchar
+      length: 256
+  indexes:
+    - columns: [keyword]
+  unique:
+    - columns: [slugified]
+
+categories:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    apple_id:
+      type: integer
+      nullable: true
+    name_de:
+      type: varchar
+      length: 100
+    name_en:
+      type: varchar
+      length: 100
+    child_of:
+      type: integer
+      nullable: true
+      foreign_key:
+        table: categories
+        column: id
+        on_delete: set_null
+  indexes:
+    - columns: [child_of]
+  unique:
+    - columns: [apple_id]
+
+comments:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    refers_to:
+      type: varchar
+      length: 255
+    type:
+      type: enum
+      values: [podcast, episode]
+    comment:
+      type: text
+    created:
+      type: datetime
+      auto_timestamp: true
+  indexes:
+    - columns: [refers_to]
+    - columns: [type]
+
+logs:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    podcast:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: podcasts
+        column: guid
+        on_delete: cascade
+    log:
+      type: text
+    is_error:
+      type: boolean
+      default: false
+    created:
+      type: datetime
+      auto_timestamp: true
+  indexes:
+    - columns: [podcast]
+    - columns: [is_error]
+
+soundbites:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    episode:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: episodes
+        column: guid
+        on_delete: cascade
+    url:
+      type: varchar
+      length: 500
+    start:
+      type: float
+    duration:
+      type: float
+    title:
+      type: varchar
+      length: 255
+      nullable: true
+    name:
+      type: varchar
+      length: 255
+      nullable: true
+    address:
+      type: varchar
+      length: 256
+      nullable: true
+    type:
+      type: varchar
+      length: 100
+      nullable: true
+    custom_key:
+      type: varchar
+      length: 255
+      nullable: true
+    custom_value:
+      type: text
+      nullable: true
+  indexes:
+    - columns: [episode]
+
+transcripts:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    episode:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: episodes
+        column: guid
+        on_delete: cascade
+    url:
+      type: text
+      nullable: true
+    type:
+      type: varchar
+      length: 50
+      nullable: true
+    language:
+      type: varchar
+      length: 20
+      nullable: true
+    rel:
+      type: varchar
+      length: 50
+      nullable: true
+    content:
+      type: text
+      nullable: true
+    is_url:
+      type: boolean
+      default: true
+    last_updated:
+      type: integer
+      auto_timestamp: true
+  indexes:
+    - columns: [episode]
+    - columns: [type]
+
+chapters:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    episode:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: episodes
+        column: guid
+        on_delete: cascade
+    position:
+      type: integer
+    start:
+      type: varchar
+      length: 20
+    title:
+      type: varchar
+      length: 255
+      nullable: true
+    url:
+      type: varchar
+      length: 500
+      nullable: true
+    image:
+      type: varchar
+      length: 500
+      nullable: true
+    last_updated:
+      type: integer
+      auto_timestamp: true
+  indexes:
+    - columns: [episode]
+
+keywords2episodes:
+  columns:
+    keyword_id:
+      type: integer
+      foreign_key:
+        table: keywords
+        column: id
+        on_delete: cascade
+    episode_guid:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: episodes
+        column: guid
+        on_delete: cascade
+    created:
+      type: datetime
+      auto_timestamp: true
+  primary_key: [keyword_id, episode_guid]
+  indexes:
+    - columns: [episode_guid]
+
+categories2podcasts:
+  columns:
+    category_id:
+      type: integer
+      foreign_key:
+        table: categories
+        column: id
+        on_delete: cascade
+    podcast_guid:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: podcasts
+        column: guid
+        on_delete: cascade
+    created:
+      type: datetime
+      auto_timestamp: true
+  primary_key: [category_id, podcast_guid]
+  indexes:
+    - columns: [podcast_guid]
+
+fundings:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    podcast:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: podcasts
+        column: guid
+        on_delete: cascade
+    url:
+      type: text
+      nullable: true
+    text:
+      type: text
+      nullable: true
+    last_updated:
+      type: integer
+      auto_timestamp: true
+  indexes:
+    - columns: [podcast]
+
+txts:
+  columns:
+    id:
+      type: integer
+      primary: true
+      autoincrement: true
+    podcast:
+      type: varchar
+      length: 255
+      foreign_key:
+        table: podcasts
+        column: guid
+        on_delete: cascade
+    content:
+      type: text
+      nullable: true
+    purpose:
+      type: varchar
+      length: 100
+      nullable: true
+    last_updated:
+      type: integer
+      auto_timestamp: true
+  indexes:
+    - columns: [podcast]

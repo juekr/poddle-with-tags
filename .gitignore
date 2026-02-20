@@ -4,3 +4,5 @@
 vendor/
 composer.lock
 dev.php
+poddle-cache.sqlite
+.DS_Store
