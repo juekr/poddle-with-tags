@@ -49,18 +49,16 @@ $channel = $poddle->getChannel();
 All channel's [required elements](https://github.com/Podcast-Standards-Project/PSP-1-Podcast-RSS-Specification#required-channel-elements) per the PSP-1 standard are available as properties on the `Channel` object:
 
 ```php
+$channel->url; // string
+$channel->atomLink; // string. Alias of $channel->url
 $channel->title; // string
-$channel->link; // ?string
+$channel->link; // string
 $channel->description; // string
 $channel->language; // string
 $channel->image; // string
 $channel->categories; // \PhanAn\Poddle\Values\CategoryCollection<\PhanAn\Poddle\Values\Category>
 $channel->explicit; // bool
 ```
-
-> [!NOTE]
-> Although required by the standard, `link` isn't supplied by all feeds, including some bigger players like Spotify's [Megaphone](https://megaphone.spotify.com/).
-> As such, `link` is nullable in Poddle.
 
 All channel’s [recommended elements](https://github.com/Podcast-Standards-Project/PSP-1-Podcast-RSS-Specification#recommended-channel-elements) are available via the `metadata` property:
 
