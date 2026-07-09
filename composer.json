@@ -1,5 +1,5 @@
 {
-  "name": "phanan/poddle",
+  "name": "juekr/poddle-with-tags",
   "description": "Parse podcast feeds with PHP following PSP-1 Podcast RSS Standard",
   "authors": [
     {
