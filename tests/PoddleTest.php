@@ -127,7 +127,22 @@ class PoddleTest extends TestCase
                 ],
                 'type' => 'episodic',
                 'complete' => false,
+                'locked_owner' => null,
+                'license_url' => null,
+                'license_type' => null,
+                'update_frequency' => null,
+                'persons' => [],
+                'value' => null,
             ],
+            'subtitle' => null,
+            'summary' => null,
+            'owner_name' => null,
+            'owner_email' => null,
+            'new_feed_url' => null,
+            'block' => false,
+            'image_url' => 'https://github.com/phanan.png',
+            'generator' => 'Rice Cooker',
+            'last_build_date' => 'Thu, 02 May 2024 06:44:38 +0000',
         ], $channel->toArray());
     }
 
@@ -158,12 +173,28 @@ class PoddleTest extends TestCase
                 'image' => null,
                 'explicit' => false,
                 'transcripts' => [],
+                'chapters' => [],
                 'keywords' => [],
                 'episode' => null,
                 'season' => null,
                 'type' => 'trailer',
                 'block' => false,
-            ]
+                'title_override' => 'Hiking Treks Trailer',
+                'author' => null,
+                'subtitle' => null,
+                'summary' => null,
+                'podcast_season_name' => null,
+                'podcast_episode_display' => null,
+                'location_text' => null,
+                'location_geo' => null,
+                'location_osm' => null,
+                'persons' => [],
+                'value' => null,
+                'soundbites' => [],
+            ],
+            'shownotes' => [
+                'content' => null,
+            ],
         ], $firstEpisode->toArray());
     }
 }

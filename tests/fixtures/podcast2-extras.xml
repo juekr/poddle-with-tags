@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:podcast="https://podcastindex.org/namespace/1.0">
+
+    <channel>
+        <title>Podcast 2.0 Extras</title>
+        <link>https://example.com</link>
+        <description>Fixture covering podcast:person, podcast:value, podcast:soundbite and friends</description>
+        <language>en-US</language>
+        <atom:link rel="self" type="application/rss+xml" href="https://example.com/feed.xml"/>
+        <itunes:subtitle>A short subtitle</itunes:subtitle>
+        <itunes:summary>A longer channel summary</itunes:summary>
+        <itunes:owner>
+            <itunes:name>Jane Doe</itunes:name>
+            <itunes:email>jane@example.com</itunes:email>
+        </itunes:owner>
+        <itunes:new-feed-url>https://example.com/new-feed.xml</itunes:new-feed-url>
+        <itunes:block>yes</itunes:block>
+        <itunes:image href="https://example.com/cover.jpg"/>
+        <podcast:locked owner="owner@example.com">yes</podcast:locked>
+        <podcast:license url="https://example.com/license">cc-by-4.0</podcast:license>
+        <podcast:updateFrequency>weekly</podcast:updateFrequency>
+        <podcast:person role="host" group="cast" img="https://example.com/dave.jpg" href="https://example.com/dave">Dave Jones</podcast:person>
+        <podcast:person role="guest">Sarah Smith</podcast:person>
+        <podcast:value type="lightning" method="keysend" suggested="0.00000005000">
+            <podcast:valueRecipient name="podcaster" type="node" address="feednode123" split="90"/>
+            <podcast:valueRecipient name="app" type="node" address="appnode456" split="10" fee="true"/>
+        </podcast:value>
+        <item>
+            <title>Episode One</title>
+            <guid isPermaLink="false">ep-1</guid>
+            <link>https://example.com/ep1</link>
+            <description>The first episode</description>
+            <enclosure url="https://example.com/ep1.mp3" type="audio/mpeg" length="1000"/>
+            <itunes:title>Episode One (iTunes override)</itunes:title>
+            <itunes:author>Dave Jones</itunes:author>
+            <itunes:subtitle>Episode subtitle</itunes:subtitle>
+            <itunes:summary>Episode summary</itunes:summary>
+            <podcast:season name="Winter Season">1</podcast:season>
+            <podcast:episode display="1a">1</podcast:episode>
+            <podcast:location geo="geo:35.65,139.90" osm="R1751536">Tokyo, Japan</podcast:location>
+            <podcast:person role="host">Dave Jones</podcast:person>
+            <podcast:soundbite startTime="73.0" duration="60.0">Why the Podcast Namespace Matters</podcast:soundbite>
+            <podcast:soundbite startTime="180.5" duration="42.0"/>
+            <podcast:value type="lightning" method="keysend">
+                <podcast:valueRecipient type="node" address="episodenode789" split="100"/>
+            </podcast:value>
+        </item>
+    </channel>
+</rss>

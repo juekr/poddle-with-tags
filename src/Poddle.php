@@ -2,6 +2,8 @@
 
 namespace PhanAn\Poddle;
 
+use DateTime;
+use DateTimeInterface;
 use Generator;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Http\Client\Factory;
@@ -17,7 +19,9 @@ use PhanAn\Poddle\Values\ChannelMetadata;
 use PhanAn\Poddle\Values\Episode;
 use PhanAn\Poddle\Values\EpisodeCollection;
 use PhanAn\Poddle\Values\FundingCollection;
+use PhanAn\Poddle\Values\PersonCollection;
 use PhanAn\Poddle\Values\TxtCollection;
+use PhanAn\Poddle\Values\Value;
 use Psr\Http\Client\ClientInterface;
 use Saloon\XmlWrangler\XmlReader;
 use Throwable;
@@ -62,9 +66,20 @@ class Poddle
 
     private static function http(): Factory
     {
-        return Http::getFacadeRoot() instanceof Factory
-            ? Http::getFacadeRoot()
-            : new Factory();
+        // Http::getFacadeRoot() throws (rather than returning null) when no
+        // facade application has been bound at all, e.g. running outside a
+        // Laravel app — the previous instanceof check never got a chance to
+        // fall back in that case.
+        try {
+            $root = Http::getFacadeRoot();
+            if ($root instanceof Factory) {
+                return $root;
+            }
+        } catch (Throwable) {
+            // fall through
+        }
+
+        return new Factory();
     }
 
     /**
@@ -85,6 +100,15 @@ class Poddle
             explicit: $this->getSoleValue('itunes:explicit') === 'yes',
             image: (string) $this->getSoleValue('itunes:image@href'),
             metadata: $this->getMetadata(),
+            subtitle: $this->getSoleValue('itunes:subtitle'),
+            summary: $this->getSoleValue('itunes:summary'),
+            ownerName: $this->getSoleValue('itunes:owner/itunes:name'),
+            ownerEmail: $this->getSoleValue('itunes:owner/itunes:email'),
+            newFeedUrl: $this->getSoleValue('itunes:new-feed-url'),
+            block: $this->getSoleValue('itunes:block') === 'yes',
+            imageUrl: $this->getSoleValue('image/url'),
+            generator: $this->getSoleValue('generator'),
+            lastBuildDate: self::parseRfc2822($this->getSoleValue('lastBuildDate')),
         );
     }
 
@@ -131,10 +155,22 @@ class Poddle
         }
     }
 
+    private static function parseRfc2822(?string $input): ?DateTime
+    {
+        if (!$input) {
+            return null;
+        }
+
+        $parsed = DateTime::createFromFormat(DateTimeInterface::RFC2822, $input);
+
+        return $parsed === false ? null : $parsed;
+    }
+
     private function getMetadata(): ChannelMetadata
     {
         return new ChannelMetadata(
             locked: $this->getSoleValue('podcast:locked') === 'yes',
+            lockedOwner: $this->getLockedOwner(),
             guid: $this->getSoleValue('podcast:guid'),
             author: $this->getSoleValue('itunes:author'),
             copyright: $this->getSoleValue('copyright'),
@@ -142,7 +178,30 @@ class Poddle
             fundings: $this->getFundings(),
             type: PodcastType::tryFrom($this->getSoleValue('itunes:type') ?? ''),
             complete: $this->getSoleValue('itunes:complete') === 'yes',
+            licenseUrl: $this->getLicenseUrl(),
+            licenseType: $this->getSoleValue('podcast:license'),
+            updateFrequency: $this->getSoleValue('podcast:updateFrequency'),
+            persons: $this->getPersons(),
+            value: $this->getValue(),
         );
+    }
+
+    private function getLockedOwner(): ?string
+    {
+        try {
+            return $this->xmlReader->xpathElement('/rss/channel/podcast:locked')->first()?->getAttribute('owner');
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    private function getLicenseUrl(): ?string
+    {
+        try {
+            return $this->xmlReader->xpathElement('/rss/channel/podcast:license')->first()?->getAttribute('url');
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     private function getFundings(): FundingCollection
@@ -164,5 +223,38 @@ class Poddle
         return TxtCollection::fromXmlElements(
             $this->xmlReader->element('rss.channel.podcast:txt')->collectLazy()
         );
+    }
+
+    /**
+     * podcast:person is valid at both channel and item level, unlike
+     * funding/category/txt — element('rss.channel.podcast:person') matches
+     * it anywhere under channel, including nested inside <item>, so this
+     * needs the XPath direct-child axis (single '/') to stay scoped to the
+     * channel's own persons.
+     */
+    private function getPersons(): PersonCollection
+    {
+        try {
+            return PersonCollection::fromXmlElements(
+                $this->xmlReader->xpathElement('/rss/channel/podcast:person')->get()
+            );
+        } catch (Throwable) {
+            return new PersonCollection();
+        }
+    }
+
+    /**
+     * Same direct-child-axis reasoning as getPersons() — podcast:value is
+     * also valid at both channel and item level.
+     */
+    private function getValue(): ?Value
+    {
+        try {
+            $element = $this->xmlReader->xpathElement('/rss/channel/podcast:value')->first();
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $element instanceof \Saloon\XmlWrangler\Data\Element ? Value::fromXmlElement($element) : null;
     }
 }
