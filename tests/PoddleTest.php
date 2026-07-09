@@ -191,6 +191,8 @@ class PoddleTest extends TestCase
                 'persons' => [],
                 'value' => null,
                 'soundbites' => [],
+                'chapters_url' => null,
+                'chapters_type' => null,
             ],
             'shownotes' => [
                 'content' => null,

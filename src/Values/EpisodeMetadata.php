@@ -38,6 +38,8 @@ class EpisodeMetadata extends Serializable
         public readonly PersonCollection $persons = new PersonCollection(),
         public readonly ?Value $value = null,
         public readonly SoundbiteCollection $soundbites = new SoundbiteCollection(),
+        public readonly ?string $chaptersUrl = null,
+        public readonly ?string $chaptersType = null,
     ) {
     }
 
@@ -47,6 +49,12 @@ class EpisodeMetadata extends Serializable
         $content = $item->getContent();
 
         $location = Arr::get($content, 'podcast:location');
+        $chapters = self::resolveChapters(
+            Arr::get($content, 'podcast:chapters')
+            ?? Arr::get($content, 'psc:chapters')
+            ?? Arr::get($content, 'podcast:chapter')
+            ?? Arr::get($content, 'psc:chapter')
+        );
 
         return new static(
             link: Arr::get($content, 'link')?->getContent(),
@@ -56,12 +64,7 @@ class EpisodeMetadata extends Serializable
             image: Arr::get($content, 'itunes:image')?->getAttribute('href'),
             explicit: Arr::get($content, 'itunes:explicit')?->getContent() === 'true',
             transcripts: self::getTranscripts(Arr::get($content, 'podcast:transcript')),
-            chapters: self::getChapters(
-                Arr::get($content, 'podcast:chapters')
-                ?? Arr::get($content, 'psc:chapters')
-                ?? Arr::get($content, 'podcast:chapter')
-                ?? Arr::get($content, 'psc:chapter')
-            ),
+            chapters: $chapters['chapters'],
             episode: optional(Arr::get($content, 'itunes:episode')?->getContent(), 'intval'),
             season: optional(Arr::get($content, 'itunes:season')?->getContent(), 'intval'),
             type: EpisodeType::tryFrom(Arr::get($content, 'itunes:episodeType')?->getContent() ?? ''),
@@ -81,6 +84,8 @@ class EpisodeMetadata extends Serializable
             soundbites: SoundbiteCollection::fromXmlElements(
                 self::normalizeToElementArray(Arr::get($content, 'podcast:soundbite'))
             ),
+            chaptersUrl: $chapters['url'],
+            chaptersType: $chapters['type'],
         );
     }
 
@@ -115,6 +120,8 @@ class EpisodeMetadata extends Serializable
             persons: PersonCollection::fromArray(Arr::get($data, 'persons', [])),
             value: optional(Arr::get($data, 'value'), static fn (array $v) => Value::fromArray($v)),
             soundbites: SoundbiteCollection::fromArray(Arr::get($data, 'soundbites', [])),
+            chaptersUrl: Arr::get($data, 'chapters_url'),
+            chaptersType: Arr::get($data, 'chapters_type'),
         );
     }
 
@@ -135,25 +142,35 @@ class EpisodeMetadata extends Serializable
         return TranscriptCollection::fromXmlElements($value);
     }
 
-    private static function getChapters(Element|array|null $value): ChapterCollection
+    /**
+     * Resolves inline chapters (psc:chapters, psc:chapter, podcast:chapter,
+     * or podcast:chapters when it has nested chapter elements) directly.
+     * For podcast:chapters referencing an *external* JSON URL, this
+     * deliberately does NOT fetch it (unlike the upstream behavior this
+     * replaces) — it only exposes the url/type so the consumer can fetch
+     * it themselves, with their own timeout/retry/error-visibility policy,
+     * rather than a fetch silently happening inside XML parsing with a
+     * hardcoded timeout and swallowed failures.
+     *
+     * @return array{chapters: ChapterCollection, url: ?string, type: ?string}
+     */
+    private static function resolveChapters(Element|array|null $value): array
     {
+        $empty = ['chapters' => new ChapterCollection(), 'url' => null, 'type' => null];
+
         if (!$value) {
-            return new ChapterCollection();
+            return $empty;
         }
 
         if ($value instanceof Element) {
             $content = $value->getContent();
 
             if ($content instanceof Element) {
-                return ChapterCollection::fromXmlElements([$content]);
+                return ['chapters' => ChapterCollection::fromXmlElements([$content]), 'url' => null, 'type' => null];
             }
 
             if (!is_array($content)) {
-                $externalUrl = $value->getAttribute('url') ?? $value->getAttribute('href');
-
-                return $externalUrl
-                    ? ChapterCollection::fromExternalUrl($externalUrl)
-                    : new ChapterCollection();
+                return self::externalChaptersReference($value, $empty);
             }
 
             $elements = [];
@@ -184,17 +201,26 @@ class EpisodeMetadata extends Serializable
             }
 
             if ($elements !== []) {
-                return ChapterCollection::fromXmlElements($elements);
+                return ['chapters' => ChapterCollection::fromXmlElements($elements), 'url' => null, 'type' => null];
             }
 
-            $externalUrl = $value->getAttribute('url') ?? $value->getAttribute('href');
-
-            return $externalUrl
-                ? ChapterCollection::fromExternalUrl($externalUrl)
-                : new ChapterCollection();
+            return self::externalChaptersReference($value, $empty);
         }
 
-        return ChapterCollection::fromXmlElements($value);
+        return ['chapters' => ChapterCollection::fromXmlElements($value), 'url' => null, 'type' => null];
+    }
+
+    /**
+     * @param array{chapters: ChapterCollection, url: ?string, type: ?string} $empty
+     * @return array{chapters: ChapterCollection, url: ?string, type: ?string}
+     */
+    private static function externalChaptersReference(Element $value, array $empty): array
+    {
+        $externalUrl = $value->getAttribute('url') ?? $value->getAttribute('href');
+
+        return $externalUrl
+            ? ['chapters' => new ChapterCollection(), 'url' => $externalUrl, 'type' => $value->getAttribute('type')]
+            : $empty;
     }
 
     /**
@@ -294,6 +320,8 @@ class EpisodeMetadata extends Serializable
             'persons' => $this->persons->toArray(),
             'value' => $this->value?->toArray(),
             'soundbites' => $this->soundbites->toArray(),
+            'chapters_url' => $this->chaptersUrl,
+            'chapters_type' => $this->chaptersType,
         ];
     }
 }
